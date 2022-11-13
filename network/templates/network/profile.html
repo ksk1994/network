@@ -1,0 +1,125 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+<script src="{% static 'network/profile.js' %}"></script>
+
+<div class="container text-center" style="width: 70rem;">
+    <div class="shadow-sm p-3 mb-5 bg-body rounded" style="--bs-border-opacity: .5;">
+        <h3>{{ name }}</h3>
+    </div>
+</div>
+
+<div class="container shadow-sm p-3 mb-5 bg-body rounded" style="width: 70rem;">
+    <div class="row">
+        <div class="col text-end" style="text-align: right;">
+            <p>{{ follower }} Followers</p>
+        </div>
+        <div class="col">
+            <p>{{ following }} Followings</p>
+        </div>
+    </div>
+</div>
+
+{% if name != user.username %}
+    <div class="container text-center" style="width: 70rem;">
+        <div class="shadow-sm p-3 mb-5 bg-body rounded" style="--bs-border-opacity: .5;">
+            {% if Follow %}
+                <a role="button" href="{% url 'follow' name %}" class="btn btn-primary">Unfollow</a> 
+            {% else %}
+                <a role="button" href="{% url 'follow' name %}" class="btn btn-primary">Follow</a> 
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
+{% for post in posts %}
+<div id="whole_post{{ post.id }}" class="post">
+    <div id="view_edit_post" class="container" style="width: 70rem;" data-post-id="edit_{{ post.id }}">
+        <div class="container shadow-sm p-3 mb-5 bg-body rounded" style="width: 70rem;">
+            <form id="edit_post">
+                <div class="mb-3 p-3">
+                    <div class="row">
+                        <div class="col">
+                            <label for="edit_post_body" class="form-label"><h4>Edit Post</h4></label>
+                        </div>
+                        <div class="col" style="text-align: right;">
+                            <button type="button" class="close btn btn-light" aria-label="Close" id="{{ post.id }}">X</button>
+                        </div>
+                    </div>
+                    <textarea name="edit_post_body" class="form-control mb-3" id="edit_post_body{{ post.id }}" rows="3" required></textarea>
+                    <button id="submit_id{{ post.id }}" type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+        <div class="container" style="width: 70rem;" data-post-id="{{ post.id }}" id="show_post">
+            <div class="shadow p-3 mb-5 bg-body rounded" style="--bs-border-opacity: .5;">
+                {% if post.user.username == user.username %}
+                    <div class="row">
+                        <div class="col" style="text-align: right;">
+                            <a role="button" href="#" class="edit p-1" id="{{ post.id }}" value="{{ post.post }}">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a role="button" id="{{ post.id }}" class="delete p-1" href="#">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col text-start">
+                        <a type="button" class="btn btn-light" href="{% url 'profile' post.user %}"><strong>{{ post.user.username }}</strong></a>
+                    </div>
+                    <div class="col p-1" style="text-align: right;">
+                        <small class="text-muted">{{ post.time }}</small>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <p data-post-id="{{ post.id }}" style="margin-left: 2rem;">{{ post.post }}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-1" style="text-align: left;">
+                        {% if user.is_authenticated %}
+                        <a role="button" class="like btn btn-light" href="#" id="{{ post.id }}" data-post-id="like_button{{ post.id }}">
+                            {% if request.user in post.likes.all %}
+                            <i class="bi bi-hand-thumbs-up-fill"></i>
+                            {% else %}
+                            <i class="bi bi-hand-thumbs-up"></i>
+                            {% endif %}
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="col" style="text-align: left;">
+                        <p class="m-2"><spam id="likes{{ post.id }}">{{ post.likes_count }}</spam>Liked</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+<div class="container" style="width: 12rem;">
+    <div class="row text-center">
+        <span>
+            Page {{ posts.number }} of {{ posts.paginator.num_pages }}.
+        </span>
+    </div>
+    <div class="row">
+        <div class="pagination justify-content-center btn-group" role="group" aria-label="Basic example">
+            {% if posts.has_previous %}
+                <a role="button" class="btn btn-primary" href="?page=1">&laquo; first</a>
+                <a role="button" class="btn btn-primary" href="?page={{ posts.previous_page_number }}">previous</a>
+            {% endif %}
+            {% if posts.has_next %}
+                <a role="button" class="btn btn-primary"  href="?page={{ posts.next_page_number }}">next</a>
+                <a role="button" class="btn btn-primary"  href="?page={{ posts.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
